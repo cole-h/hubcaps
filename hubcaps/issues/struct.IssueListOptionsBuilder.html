@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="rustdoc">
+    <meta name="description" content="API documentation for the Rust `IssueListOptionsBuilder` struct in crate `hubcaps`.">
+    <meta name="keywords" content="rust, rustlang, rust-lang, IssueListOptionsBuilder">
+
+    <title>hubcaps::issues::IssueListOptionsBuilder - Rust</title>
+
+    <link rel="stylesheet" type="text/css" href="../../normalize.css">
+    <link rel="stylesheet" type="text/css" href="../../rustdoc.css">
+    <link rel="stylesheet" type="text/css" href="../../main.css">
+    
+
+    
+    
+</head>
+<body class="rustdoc struct">
+    <!--[if lte IE 8]>
+    <div class="warning">
+        This old browser is unsupported and will most likely display funky
+        things.
+    </div>
+    <![endif]-->
+
+    
+
+    <nav class="sidebar">
+        
+        <p class='location'>Struct IssueListOptionsBuilder</p><div class="block items"><ul><li><a href="#methods">Methods</a></li></ul></div><p class='location'><a href='../index.html'>hubcaps</a>::<wbr><a href='index.html'>issues</a></p><script>window.sidebarCurrent = {name: 'IssueListOptionsBuilder', ty: 'struct', relpath: ''};</script><script defer src="sidebar-items.js"></script>
+    </nav>
+
+    <nav class="sub">
+        <form class="search-form js-only">
+            <div class="search-container">
+                <input class="search-input" name="search"
+                       autocomplete="off"
+                       placeholder="Click or press ‘S’ to search, ‘?’ for more options…"
+                       type="search">
+            </div>
+        </form>
+    </nav>
+
+    <section id='main' class="content">
+<h1 class='fqn'><span class='in-band'>Struct <a href='../index.html'>hubcaps</a>::<wbr><a href='index.html'>issues</a>::<wbr><a class="struct" href=''>IssueListOptionsBuilder</a></span><span class='out-of-band'><span id='render-detail'>
+                   <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">
+                       [<span class='inner'>&#x2212;</span>]
+                   </a>
+               </span><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#258' title='goto source code'>[src]</a></span></h1>
+<pre class='rust struct'>pub struct IssueListOptionsBuilder(_);</pre><div class='docblock'><p>a mutable issue list builder</p>
+</div>
+                    <h2 id='methods' class='small-section-header'>
+                      Methods<a href='#methods' class='anchor'></a>
+                    </h2>
+                <h3 id='impl' class='impl'><span class='in-band'><code>impl <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code><a href='#impl' class='anchor'></a></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#260-338' title='goto source code'>[src]</a></span></h3>
+<div class='impl-items'><h4 id='method.new' class="method"><span id='new.v' class='invisible'><code>fn <a href='#method.new' class='fnname'>new</a>() -&gt; <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#261-263' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.state' class="method"><span id='state.v' class='invisible'><code>fn <a href='#method.state' class='fnname'>state</a>(&amp;mut self, state: <a class="enum" href="../../hubcaps/issues/enum.State.html" title="enum hubcaps::issues::State">State</a>) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#265-268' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.sort' class="method"><span id='sort.v' class='invisible'><code>fn <a href='#method.sort' class='fnname'>sort</a>(&amp;mut self, sort: <a class="enum" href="../../hubcaps/issues/enum.Sort.html" title="enum hubcaps::issues::Sort">Sort</a>) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#270-273' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.asc' class="method"><span id='asc.v' class='invisible'><code>fn <a href='#method.asc' class='fnname'>asc</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#275-277' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.desc' class="method"><span id='desc.v' class='invisible'><code>fn <a href='#method.desc' class='fnname'>desc</a>(&amp;mut self) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#279-281' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.direction' class="method"><span id='direction.v' class='invisible'><code>fn <a href='#method.direction' class='fnname'>direction</a>(<br>&nbsp;&nbsp;&nbsp;&nbsp;&amp;mut self, <br>&nbsp;&nbsp;&nbsp;&nbsp;direction: <a class="enum" href="../../hubcaps/enum.SortDirection.html" title="enum hubcaps::SortDirection">SortDirection</a><br>) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#283-286' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.assignee' class="method"><span id='assignee.v' class='invisible'><code>fn <a href='#method.assignee' class='fnname'>assignee</a>&lt;A&gt;(&amp;mut self, assignee: A) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;A: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#288-294' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.creator' class="method"><span id='creator.v' class='invisible'><code>fn <a href='#method.creator' class='fnname'>creator</a>&lt;C&gt;(&amp;mut self, creator: C) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;C: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#296-302' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.mentioned' class="method"><span id='mentioned.v' class='invisible'><code>fn <a href='#method.mentioned' class='fnname'>mentioned</a>&lt;M&gt;(&amp;mut self, mentioned: M) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;M: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#304-310' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.labels' class="method"><span id='labels.v' class='invisible'><code>fn <a href='#method.labels' class='fnname'>labels</a>&lt;L&gt;(&amp;mut self, labels: <a class="struct" href="https://doc.rust-lang.org/nightly/alloc/vec/struct.Vec.html" title="struct alloc::vec::Vec">Vec</a>&lt;L&gt;) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;L: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#312-325' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.since' class="method"><span id='since.v' class='invisible'><code>fn <a href='#method.since' class='fnname'>since</a>&lt;S&gt;(&amp;mut self, since: S) -&gt; &amp;mut <a class="struct" href="../../hubcaps/issues/struct.IssueListOptionsBuilder.html" title="struct hubcaps::issues::IssueListOptionsBuilder">IssueListOptionsBuilder</a> <span class="where fmt-newline">where<br>&nbsp;&nbsp;&nbsp;&nbsp;S: <a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;,&nbsp;</span></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#327-333' title='goto source code'>[src]</a></span></h4>
+<h4 id='method.build' class="method"><span id='build.v' class='invisible'><code>fn <a href='#method.build' class='fnname'>build</a>(&amp;self) -&gt; <a class="struct" href="../../hubcaps/issues/struct.IssueListOptions.html" title="struct hubcaps::issues::IssueListOptions">IssueListOptions</a></code></span><span class='out-of-band'><div class='ghost'></div><a class='srclink' href='../../src/hubcaps/issues/mod.rs.html#335-337' title='goto source code'>[src]</a></span></h4>
+</div></section>
+    <section id='search' class="content hidden"></section>
+
+    <section class="footer"></section>
+
+    <aside id="help" class="hidden">
+        <div>
+            <h1 class="hidden">Help</h1>
+
+            <div class="shortcuts">
+                <h2>Keyboard Shortcuts</h2>
+
+                <dl>
+                    <dt>?</dt>
+                    <dd>Show this help dialog</dd>
+                    <dt>S</dt>
+                    <dd>Focus the search field</dd>
+                    <dt>&larrb;</dt>
+                    <dd>Move up in search results</dd>
+                    <dt>&rarrb;</dt>
+                    <dd>Move down in search results</dd>
+                    <dt>&#9166;</dt>
+                    <dd>Go to active search result</dd>
+                    <dt>+</dt>
+                    <dd>Collapse/expand all sections</dd>
+                </dl>
+            </div>
+
+            <div class="infos">
+                <h2>Search Tricks</h2>
+
+                <p>
+                    Prefix searches with a type followed by a colon (e.g.
+                    <code>fn:</code>) to restrict the search to a given type.
+                </p>
+
+                <p>
+                    Accepted types are: <code>fn</code>, <code>mod</code>,
+                    <code>struct</code>, <code>enum</code>,
+                    <code>trait</code>, <code>type</code>, <code>macro</code>,
+                    and <code>const</code>.
+                </p>
+
+                <p>
+                    Search functions by type signature (e.g.
+                    <code>vec -> usize</code> or <code>* -> vec</code>)
+                </p>
+            </div>
+        </div>
+    </aside>
+
+    
+
+    <script>
+        window.rootPath = "../../";
+        window.currentCrate = "hubcaps";
+    </script>
+    <script src="../../main.js"></script>
+    <script defer src="../../search-index.js"></script>
+</body>
+</html>
