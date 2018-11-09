@@ -91,6 +91,7 @@ pub mod search;
 pub mod teams;
 pub mod organizations;
 pub mod app;
+pub mod checks;
 
 pub use errors::{Error, ErrorKind, Result};
 use gists::{Gists, UserGists};
@@ -300,6 +301,13 @@ impl ExpiringJWTCredential {
     }
 }
 
+/// A caching token "generator" which contains JWT credentials.
+///
+/// The authentication mechanism in the GitHub client library
+/// determines if the token is stale, and if so, uses the contained
+/// JWT credentials to fetch a new installation token.
+///
+/// The Mutex<Option> access key is for interior mutability.
 #[derive(Debug)]
 pub struct InstallationTokenGenerator {
     pub installation_id: i32,
@@ -315,10 +323,15 @@ impl InstallationTokenGenerator {
             access_key: Mutex::new(None),
         }
     }
+
     fn set_token(&self, token: app::AccessToken) {
         *self.access_key.lock().unwrap() = Some(token.token);
     }
 
+    /// Fetch the contained token
+    ///
+    /// Panics if the token is stale: always check staleness before
+    /// fetching the token.
     fn token(&self) -> String {
         if self.is_stale() {
             panic!("Token is stale!");
@@ -460,6 +473,15 @@ impl Github {
     }
 
     fn authenticate(&self, method: Method, url: String) -> RequestBuilder {
+        // We complete remove the credentials from the client, because
+        // if we are using the Installation token method we may need
+        // to replace the client's credentials and issue another
+        // request.
+        //
+        // At the end of this function, we will put the credentials
+        // back.
+        //
+        // I hope this is safe.
         let mut creds_lock = self.credentials.lock().unwrap();
         let creds_orig = creds_lock.take().unwrap();
         drop(creds_lock);
@@ -488,6 +510,8 @@ impl Github {
             }
             Credentials::InstallationToken(ref apptoken) => {
                 if apptoken.is_stale() {
+                    // Plunk in the JWT credentials for refreshing our
+                    // installation token.
                     debug!("App token is stale, refreshing");
                     let mut creds = self.credentials.lock().unwrap();
                     *creds = Some(Credentials::JWT(apptoken.jwt_credential.clone()));

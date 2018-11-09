@@ -14,6 +14,7 @@ use releases::Releases;
 use teams::RepoTeams;
 use statuses::Statuses;
 use users::User;
+use checks::CheckRuns;
 
 use std::fmt;
 use super::SortDirection;
@@ -370,6 +371,11 @@ impl<'a> Repository<'a> {
     /// get a reference to github issues associated with this repository ref
     pub fn issues(&self) -> Issues {
         Issues::new(self.github, self.owner.as_str(), self.repo.as_str())
+    }
+
+    /// get a reference to github checks associated with this repository ref
+    pub fn checkruns(&self) -> CheckRuns {
+        CheckRuns::new(self.github, self.owner.as_str(), self.repo.as_str())
     }
 
     /// get a reference to [deploy keys](https://developer.github.com/v3/repos/keys/)
