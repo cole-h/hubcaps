@@ -426,11 +426,22 @@ impl Github {
     where
         D: DeserializeOwned,
     {
+        self.post_media(
+            uri,
+            message,
+            MediaType::Json,
+        )
+    }
+
+    fn post_media<D>(&self, uri: &str, message: &[u8], media: MediaType) -> Result<D>
+    where
+        D: DeserializeOwned,
+    {
         self.request_entity(
             Method::Post,
             self.host.clone() + uri,
             Some(message),
-            MediaType::Json,
+            media,
         )
     }
 
