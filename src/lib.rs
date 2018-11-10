@@ -90,6 +90,7 @@ pub mod pulls;
 pub mod search;
 pub mod teams;
 pub mod organizations;
+pub mod app;
 
 pub use errors::{Error, ErrorKind, Result};
 use gists::{Gists, UserGists};
@@ -103,6 +104,7 @@ use hyper::status::StatusCode;
 use repositories::{Repository, Repositories, UserRepositories, OrganizationRepositories};
 use organizations::{Organization, Organizations, UserOrganizations};
 use users::Users;
+use app::App;
 use std::fmt;
 use url::Url;
 use std::collections::HashMap;
@@ -402,6 +404,12 @@ impl Github {
         O: Into<String>,
     {
         OrganizationRepositories::new(self, org)
+    }
+
+    /// Return a reference to GitHub Apps
+    pub fn app(&self) -> App
+    {
+        App::new(self)
     }
 
     fn authenticate(&self, method: Method, url: String) -> RequestBuilder {
