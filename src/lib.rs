@@ -193,6 +193,9 @@ pub enum Credentials {
     /// background. app-id, key-file.
     /// https://developer.github.com/apps/building-github-apps/authenticating-with-github-apps/
     JWT(JWTCredentials),
+    /// JWT-based App Installation Token
+    /// https://developer.github.com/apps/building-github-apps/authenticating-with-github-apps/
+    InstallationToken(InstallationTokenGenerator),
 }
 
 impl Default for Credentials {
@@ -235,6 +238,10 @@ impl JWTCredentials {
             private_key_file: private_key_file.into(),
             cache: Arc::new(Mutex::new(creds)),
         }
+    }
+
+    fn is_stale(&self) -> bool {
+        self.cache.lock().unwrap().is_stale()
     }
 
     /// Fetch a valid JWT token, regenerating it if necessary
@@ -293,12 +300,52 @@ impl ExpiringJWTCredential {
     }
 }
 
+#[derive(Debug)]
+pub struct InstallationTokenGenerator {
+    pub installation_id: i32,
+    pub jwt_credential: JWTCredentials,
+    access_key: Mutex<Option<String>>
+}
+
+impl InstallationTokenGenerator {
+    pub fn new(installation_id: i32, creds: JWTCredentials) -> InstallationTokenGenerator {
+        InstallationTokenGenerator {
+            installation_id: installation_id,
+            jwt_credential: creds,
+            access_key: Mutex::new(None),
+        }
+    }
+    fn set_token(&self, token: app::AccessToken) {
+        *self.access_key.lock().unwrap() = Some(token.token);
+    }
+
+    fn token(&self) -> String {
+        if self.is_stale() {
+            panic!("Token is stale!");
+        }
+        let keylock = self.access_key.lock().unwrap().clone();
+        keylock.unwrap().clone()
+    }
+
+    fn is_stale(&self) -> bool {
+        self.jwt_credential.is_stale()
+            || self.access_key.lock().unwrap().is_none()
+    }
+}
+
+impl PartialEq for InstallationTokenGenerator {
+    fn eq(&self, other: &InstallationTokenGenerator) -> bool {
+        self.installation_id == other.installation_id &&
+            self.jwt_credential == other.jwt_credential
+    }
+}
+
 /// Entry point interface for interacting with Github API
 pub struct Github {
     host: String,
     agent: String,
     client: Client,
-    credentials: Credentials,
+    credentials: Mutex<Option<Credentials>>,
 }
 
 impl Github {
@@ -322,7 +369,7 @@ impl Github {
             host: host.into(),
             agent: agent.into(),
             client: client,
-            credentials: credentials,
+            credentials: Mutex::new(Some(credentials)),
         }
     }
 
@@ -413,28 +460,58 @@ impl Github {
     }
 
     fn authenticate(&self, method: Method, url: String) -> RequestBuilder {
-        match self.credentials {
+        let mut creds_lock = self.credentials.lock().unwrap();
+        let creds_orig = creds_lock.take().unwrap();
+        drop(creds_lock);
+
+        let ret;
+
+        match creds_orig {
             Credentials::Token(ref token) => {
-                self.client.request(method, &url).header(Authorization(
+                ret = self.client.request(method, &url).header(Authorization(
                     format!("token {}", token),
-                ))
+                ));
             }
             Credentials::Client(ref id, ref secret) => {
-
                 let mut parsed = Url::parse(&url).unwrap();
                 parsed
                     .query_pairs_mut()
                     .append_pair("client_id", id)
                     .append_pair("client_secret", secret);
-                self.client.request(method, parsed)
+                ret = self.client.request(method, parsed);
             }
             Credentials::JWT(ref jwt) => {
-                self.client.request(method, &url).header(Authorization(
-                    format!("Bearer {}", jwt.token())
-                ))
+                let header = format!("Bearer {}", jwt.token());
+                ret = self.client.request(method, &url).header(Authorization(
+                    header
+                ));
             }
-            Credentials::None => self.client.request(method, &url),
+            Credentials::InstallationToken(ref apptoken) => {
+                if apptoken.is_stale() {
+                    debug!("App token is stale, refreshing");
+                    let mut creds = self.credentials.lock().unwrap();
+                    *creds = Some(Credentials::JWT(apptoken.jwt_credential.clone()));
+                    drop(creds);
+
+                    let token = self.app().make_access_token(apptoken.installation_id).unwrap();
+
+                    apptoken.set_token(token);
+                }
+
+                ret = self.client.request(method, &url).header(Authorization(
+                    format!("token {}", apptoken.token()),
+                ));
+            }
+
+            Credentials::None => {
+                ret = self.client.request(method, &url);
+            }
         }
+
+        let mut creds = self.credentials.lock().unwrap();
+        *creds = Some(creds_orig);
+
+        return ret;
     }
 
 
