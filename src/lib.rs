@@ -63,8 +63,10 @@ extern crate hyper;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
+#[macro_use]
 extern crate serde_json;
 extern crate url;
+extern crate frank_jwt;
 
 // all the modules!
 use serde::de::DeserializeOwned;
@@ -104,11 +106,20 @@ use users::Users;
 use std::fmt;
 use url::Url;
 use std::collections::HashMap;
+use std::path::PathBuf;
+use std::time;
+use std::sync::Mutex;
+use std::sync::Arc;
+use frank_jwt::{Algorithm, encode};
+
 
 /// Link header type
 header! { (Link, "Link") => [String] }
 
 const DEFAULT_HOST: &'static str = "https://api.github.com";
+const MAX_JWT_TOKEN_LIFE: time::Duration = time::Duration::from_secs(60 * 10);
+// 9 minutes so we refresh sooner than it actually expires
+const JWT_TOKEN_REFRESH_PERIOD: time::Duration = time::Duration::from_secs(60 * 9);
 
 /// alias for Result that infers hubcaps::Error as Err
 // pub type Result<T> = std::result::Result<T, Error>;
@@ -176,11 +187,107 @@ pub enum Credentials {
     /// Oauth client id and secret
     /// https://developer.github.com/v3/#oauth2-keysecret
     Client(String, String),
+    /// JWT token exchange, to be performed transparently in the
+    /// background. app-id, key-file.
+    /// https://developer.github.com/apps/building-github-apps/authenticating-with-github-apps/
+    JWT(JWTCredentials),
 }
 
 impl Default for Credentials {
     fn default() -> Credentials {
         Credentials::None
+    }
+}
+
+/// JSON Web Token authentication mechanism
+///
+/// The GitHub client methods are all &self, but the dynamically
+/// generated JWT token changes regularly. The token is also a bit
+/// expensive to regenerate, so we do want to have a mutable cache.
+///
+/// We use a token inside a Mutex so we can have interior mutability
+/// even though JWTCredentials is not mutable.
+#[derive(Debug, Clone)]
+pub struct JWTCredentials {
+    pub app_id: i32,
+    pub private_key_file: PathBuf,
+    cache: Arc<Mutex<ExpiringJWTCredential>>
+}
+
+impl JWTCredentials {
+    pub fn new<A, P>(app_id: A, private_key_file: P) -> JWTCredentials
+    where
+        P: Into<PathBuf>,
+        A: Into<i32>
+    {
+        let app_id = app_id.into();
+        let private_key_file = private_key_file.into();
+
+        let creds = ExpiringJWTCredential::calculate(
+            &app_id,
+            &private_key_file
+        );
+
+        JWTCredentials {
+            app_id: app_id,
+            private_key_file: private_key_file.into(),
+            cache: Arc::new(Mutex::new(creds)),
+        }
+    }
+
+    /// Fetch a valid JWT token, regenerating it if necessary
+    pub fn token(&self) -> String {
+        let mut expiring = self.cache.lock().unwrap();
+        if expiring.is_stale() {
+            * expiring = ExpiringJWTCredential::calculate(
+                &self.app_id,
+                &self.private_key_file,
+            );
+        }
+
+        expiring.token.clone()
+    }
+}
+
+impl PartialEq for JWTCredentials {
+    fn eq(&self, other: &JWTCredentials) -> bool {
+        self.app_id == other.app_id &&
+            self.private_key_file == other.private_key_file
+    }
+}
+
+#[derive(Debug)]
+struct ExpiringJWTCredential {
+    token: String,
+    created_at: time::Instant
+}
+
+impl ExpiringJWTCredential {
+    fn calculate(app_id: &i32, private_key_file: &PathBuf) -> ExpiringJWTCredential {
+        // SystemTime can go backwards, Instant can't, so always use
+        // Instant for ensuring regular cycling.
+        let created_at = time::Instant::now();
+        let now = time::SystemTime::now().duration_since(time::UNIX_EPOCH).unwrap();
+        let expires = now + MAX_JWT_TOKEN_LIFE;
+
+        let payload = json!({
+            "iat" : now.as_secs(),
+            "exp" : expires.as_secs(),
+            "iss": app_id,
+        });
+        let header = json!({});
+        let jwt = encode(header, private_key_file, &payload,
+                         Algorithm::RS256)
+            .expect(&format!("key {:?} may not exist", private_key_file));
+
+        ExpiringJWTCredential {
+            created_at: created_at,
+            token: jwt,
+        }
+    }
+
+    fn is_stale(&self) -> bool {
+        self.created_at.elapsed() >= JWT_TOKEN_REFRESH_PERIOD
     }
 }
 
@@ -312,6 +419,11 @@ impl Github {
                     .append_pair("client_id", id)
                     .append_pair("client_secret", secret);
                 self.client.request(method, parsed)
+            }
+            Credentials::JWT(ref jwt) => {
+                self.client.request(method, &url).header(Authorization(
+                    format!("Bearer {}", jwt.token())
+                ))
             }
             Credentials::None => self.client.request(method, &url),
         }
