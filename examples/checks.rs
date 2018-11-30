@@ -9,8 +9,10 @@ use hyper::Client;
 use hyper::net::HttpsConnector;
 use hyper_native_tls::NativeTlsClient;
 use hubcaps::{Credentials, Github, JWTCredentials, InstallationTokenGenerator};
-use hubcaps::checks::{CheckRunOptions, Action, Output, Conclusion, Annotation, AnnotationLevel, Image};
+use hubcaps::checks::{CheckRunOptions, CheckRunUpdateOptions, Output, Conclusion, CheckRunState};
 use std::env;
+use std::thread;
+use std::time::Duration;
 
 fn main() {
     env_logger::init().unwrap();
@@ -28,67 +30,78 @@ fn main() {
 
     let repo = github.repo("grahamc", "notpkgs");
     let checks = repo.checkruns();
-    let options = &CheckRunOptions{
-        actions: Some(vec![
-            Action {
-                description: "click to do a thing".to_string(),
-                identifier: "the thing".to_string(),
-                label: "nix-build -A pkgA".to_string(),
-            },
-            Action {
-                description: "click to do a different thing".to_string(),
-                identifier: "the different thing".to_string(),
-                label: "nix-build -A pkgB".to_string(),
-            }
 
-        ]),
-        completed_at: Some("2018-01-01T01:01:01Z".to_string()),
-        started_at: Some("2018-08-01T01:01:01Z".to_string()),
-        conclusion: Some(Conclusion::Neutral),
-        details_url: Some("https://nix.ci/status/hi".to_string()),
-        external_id: Some("heyyy".to_string()),
-        head_sha: "263376dd4c872fbaa976f4055ec6269ab66e3a73".to_string(),
-        name: "nix-build . -A pkgA".to_string(),
-        output: Some(Output {
-            annotations: Some(vec![
-                Annotation {
-                    annotation_level: AnnotationLevel::Warning,
-                    start_line: 4,
-                    end_line: 4,
-                    start_column: Some(4),
-                    end_column: Some(6),
-                    message: "Trailing whitespace".to_string(),
-                    path: "bogus".to_string(),
-                    raw_details: "".to_string(),
-                    title: "Whitespace".to_string(),
-                },
+    let r = checks.create(&CheckRunOptions {
+        name: "live updates! nix-build -A  --argstr system x86_64-linux".to_string(),
+        actions: None,
+        started_at: None,
+        completed_at: None,
+        status: Some(CheckRunState::Queued),
+        conclusion: None,
+        details_url: None,
+        external_id: Some("bogus-request-id".to_string()),
+        head_sha: "fba11b4caba20e70dd3eb6499a17ea45a796aca4".to_string(), // "abc123".to_string(),
+        output: None,
+    }).unwrap();
+    println!("{:?}", r);
+    thread::sleep(Duration::from_secs(15));
+    println!("{:?}", checks.update(
+        &r.id,
+        &CheckRunUpdateOptions {
+            status: Some(CheckRunState::InProgress),
+            conclusion: None,
+            details_url: Some("https://logs.nix.ci/?key=nixos/nixpkgs.2345&attempt_id=foo".to_string()),
+            external_id: None,
+            output: Some(Output {
+                title: "Build Started".to_string(),
+                summary: "See streaming logs at https://logs.nix.ci/?key=nixos/nixpkgs.2345&attempt_id=foo".to_string(),
+                text: None,
+                annotations: None,
+                images: None,
+            }),
+            actions: None,
+            completed_at: None,
+            name: None,
+            started_at: None,
+        }));
 
-                Annotation {
-                    annotation_level: AnnotationLevel::Warning,
-                    start_line: 7,
-                    end_line: 7,
-                    start_column: Some(4),
-                    end_column: Some(8),
-                    message: "not sure you meant this letter".to_string(),
-                    path: "bogus".to_string(),
-                    raw_details: "rawdeetshere\n  is\n   some\n    text".to_string(),
-                    title: "hiiii".to_string(),
-                }
-            ]),
-            images: Some(vec![
-                Image{
-                    alt: "alt text".to_string(),
-                    caption: Some("caption text".to_string()),
-                    image_url: "https://nix.ci/nix.ci.svg".to_string(),
-                }
-            ]),
-            summary: "build failed".to_string(),
-            text: Some("texthere\n  is\n   some\n    text".to_string()),
-            title: "build failed".to_string()
-        }),
-        status: None,
-    };
+    thread::sleep(Duration::from_secs(10));
+    println!("{:?}", checks.update(
+        &r.id,
+        &CheckRunUpdateOptions {
+            name: None,
+            actions: None,
+            started_at: None,
+            completed_at: Some("2018-01-01T01:01:01Z".to_string()),
+            status: Some(CheckRunState::Completed),
+            conclusion: Some(Conclusion::Success),
+            details_url: None,
+            external_id: None,
+            output: Some(Output {
+                title: "Build Results".to_string(),
+                summary: "Attempted: `foo`
 
-    println!("{}", serde_json::to_string(options).unwrap());
-    println!("{:?}", checks.create(options));
+The following builds were skipped because they don't evaluate on x86_64-linux: `bar`.".to_string(),
+                text: Some("
+Partial log from building `foo`:
+
+```
+make[2]: Entering directory '/private/tmp/nix-build-gdb-8.1.drv-0/gdb-8.1/readline'
+make[2]: Nothing to be done for 'install'.
+make[2]: Leaving directory '/private/tmp/nix-build-gdb-8.1.drv-0/gdb-8.1/readline'
+make[1]: Nothing to be done for 'install-target'.
+make[1]: Leaving directory '/private/tmp/nix-build-gdb-8.1.drv-0/gdb-8.1'
+removed '/nix/store/pcja75y9isdvgz5i00pkrpif9rxzxc29-gdb-8.1/share/info/bfd.info'
+post-installation fixup
+strip is /nix/store/5a88zk3jgimdmzg8rfhvm93kxib3njf9-cctools-binutils-darwin/bin/strip
+patching script interpreter paths in /nix/store/pcja75y9isdvgz5i00pkrpif9rxzxc29-gdb-8.1
+/nix/store/pcja75y9isdvgz5i00pkrpif9rxzxc29-gdb-8.1
+```
+
+".to_string()),
+                annotations: None,
+                images: None,
+            }),
+        }
+    ));
 }

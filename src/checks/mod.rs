@@ -37,7 +37,7 @@ impl<'a> CheckRuns<'a> {
         )
     }
 
-    pub fn update(&self, check_run_id: &str, check_run_options: &CheckRunOptions) -> Result<CheckRun> {
+    pub fn update(&self, check_run_id: &i32, check_run_options: &CheckRunUpdateOptions) -> Result<CheckRun> {
         let data = serde_json::to_string(&check_run_options)?;
         self.github.patch_media::<CheckRun>(
             &self.path(&format!("/{}", check_run_id)),
@@ -58,7 +58,7 @@ impl<'a> CheckRuns<'a> {
 
 // representations
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum CheckRunState {
     Queued,
@@ -66,7 +66,7 @@ pub enum CheckRunState {
     Completed,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Conclusion {
     Success,
@@ -77,7 +77,7 @@ pub enum Conclusion {
     ActionRequired,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum AnnotationLevel {
     Notice,
@@ -85,7 +85,7 @@ pub enum AnnotationLevel {
     Failure,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Output {
     pub title: String,
     pub summary: String,
@@ -97,14 +97,14 @@ pub struct Output {
     pub images: Option<Vec<Image>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Action {
     pub label: String,
     pub description: String,
     pub identifier: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Annotation {
     pub path: String,
     pub start_line: u32,
@@ -119,7 +119,7 @@ pub struct Annotation {
     pub raw_details: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct Image {
     pub alt: String,
     pub image_url: String,
@@ -127,7 +127,7 @@ pub struct Image {
     pub caption: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct CheckRunOptions {
     pub name: String,
     pub head_sha: String,
@@ -141,16 +141,40 @@ pub struct CheckRunOptions {
     pub started_at: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub conclusion: Option<Conclusion>,
-   #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub completed_at: Option<String>,
-   #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub output: Option<Output>,
-   #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub actions: Option<Vec<Action>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+
+#[derive(Debug, Serialize, PartialEq)]
+pub struct CheckRunUpdateOptions {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub external_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<CheckRunState>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub started_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub conclusion: Option<Conclusion>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub output: Option<Output>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub actions: Option<Vec<Action>>,
+}
+
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct CheckRun {
+    pub id: i32,
     pub name: String,
     pub head_sha: String,
     pub url: String,
@@ -161,11 +185,28 @@ pub struct CheckRun {
     pub started_at: Option<String>,
     pub conclusion: Option<Conclusion>,
     pub completed_at: Option<String>,
+    /*
+    Deleted for now:
+
+    GitHub's API returns:
+
+      "output": {
+        "title": null,
+        "summary": null,
+        "text": null,
+        "annotations_count": 0,
+        "annotations_url": "https://api.github.com/repos/grahamc/notpkgs/check-runs/30726963/annotations"
+      },
+
+    if there is no Output, which confuses serde.
+
+
     pub output: Option<Output>,
+     */
     pub actions: Option<Vec<Action>>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, PartialEq)]
 pub struct CheckSuite {
     pub id: u32,
 }
