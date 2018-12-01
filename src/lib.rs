@@ -114,15 +114,18 @@ use std::time;
 use std::sync::Mutex;
 use std::sync::Arc;
 use frank_jwt::{Algorithm, encode};
+use std::io::Read;
 
 
 /// Link header type
 header! { (Link, "Link") => [String] }
 
 const DEFAULT_HOST: &'static str = "https://api.github.com";
-const MAX_JWT_TOKEN_LIFE: time::Duration = time::Duration::from_secs(60 * 10);
-// 9 minutes so we refresh sooner than it actually expires
-const JWT_TOKEN_REFRESH_PERIOD: time::Duration = time::Duration::from_secs(60 * 9);
+// 9 minutes so we always come below github's 10minmax even if their or
+// our clocks are slightly off
+const MAX_JWT_TOKEN_LIFE: time::Duration = time::Duration::from_secs(60 * 9);
+// 8 minutes so we refresh sooner than it actually expires
+const JWT_TOKEN_REFRESH_PERIOD: time::Duration = time::Duration::from_secs(60 * 8);
 
 /// alias for Result that infers hubcaps::Error as Err
 // pub type Result<T> = std::result::Result<T, Error>;
