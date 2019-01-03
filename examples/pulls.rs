@@ -48,6 +48,17 @@ fn main() {
             {
                 println!("{:#?}", c);
             }
+
+            println!("review requests");
+            println!("{:#?}",
+                     github
+                     .repo("softprops", "hubcaps")
+                     .pulls()
+                     .get(190)
+                     .review_requests()
+                     .get()
+                     .unwrap()
+            );
         }
         _ => println!("example missing GITHUB_TOKEN"),
     }

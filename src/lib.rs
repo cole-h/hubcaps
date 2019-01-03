@@ -85,6 +85,7 @@ pub mod issues;
 pub mod labels;
 pub mod releases;
 pub mod repositories;
+pub mod review_requests;
 pub mod statuses;
 pub mod pulls;
 pub mod search;
@@ -114,7 +115,6 @@ use std::time;
 use std::sync::Mutex;
 use std::sync::Arc;
 use frank_jwt::{Algorithm, encode};
-use std::io::Read;
 
 
 /// Link header type
@@ -639,6 +639,18 @@ impl Github {
             Method::Delete,
             self.host.clone() + uri,
             None,
+            MediaType::Json,
+        ) {
+            Err(Error(ErrorKind::Codec(_), _)) => Ok(()),
+            otherwise => otherwise,
+        }
+    }
+
+    fn delete_message(&self, uri: &str, message: &[u8]) -> Result<()> {
+        match self.request_entity::<()>(
+            Method::Delete,
+            self.host.clone() + uri,
+            Some(message),
             MediaType::Json,
         ) {
             Err(Error(ErrorKind::Codec(_), _)) => Ok(()),

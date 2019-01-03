@@ -5,6 +5,7 @@ use super::{Iter, Github, Result};
 use comments::Comments;
 use pull_commits::PullCommits;
 use review_comments::ReviewComments;
+use review_requests::ReviewRequests;
 use users::User;
 use std::default::Default;
 use std::fmt;
@@ -120,6 +121,15 @@ impl<'a> PullRequest<'a> {
     pub fn review_comments(&self) -> ReviewComments {
         ReviewComments::new(
             self.github,
+            self.owner.clone(),
+            self.repo.clone(),
+            self.number,
+        )
+    }
+
+    pub fn review_requests(&self) -> ReviewRequests {
+        ReviewRequests::new(
+            self.github.clone(),
             self.owner.clone(),
             self.repo.clone(),
             self.number,
