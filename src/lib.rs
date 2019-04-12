@@ -79,6 +79,7 @@ pub mod pull_commits;
 pub mod keys;
 pub mod gists;
 pub mod deployments;
+#[allow(deprecated)]
 pub mod errors;
 pub mod hooks;
 pub mod issues;
