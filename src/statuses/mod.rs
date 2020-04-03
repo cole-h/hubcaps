@@ -65,8 +65,8 @@ impl<'a> Statuses<'a> {
 
 #[derive(Debug, Deserialize)]
 pub struct Status {
-    pub created_at: String,
-    pub updated_at: String,
+    pub created_at: Option<String>,
+    pub updated_at: Option<String>,
     pub state: State,
     pub target_url: Option<String>,
     pub description: String,
